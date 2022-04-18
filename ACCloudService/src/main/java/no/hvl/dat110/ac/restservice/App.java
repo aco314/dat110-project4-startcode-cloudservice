@@ -17,6 +17,7 @@ public class App {
 	
 	static AccessLog accesslog = null;
 	static AccessCode accesscode = null;
+	static Gson gson;
 	
 	public static void main(String[] args) {
 
@@ -30,6 +31,7 @@ public class App {
 		
 		accesslog = new AccessLog();
 		accesscode  = new AccessCode();
+		gson = new Gson();
 		
 		after((req, res) -> {
   		  res.type("application/json");
@@ -37,15 +39,40 @@ public class App {
 		
 		// for basic testing purposes
 		get("/accessdevice/hello", (req, res) -> {
-			
-		 	Gson gson = new Gson();
-		 	
 		 	return gson.toJson("IoT Access Control Device");
 		});
 		
 		// TODO: implement the routes required for the access control service
 		// as per the HTTP/REST operations describined in the project description
+		post("/accessdevice/log/", (req, res) -> {
+			AccessMessage message = gson.fromJson(req.body(), AccessMessage.class);
+			int messageId = accesslog.add(message.getMessage());
+			return gson.toJson(accesslog.get(messageId));
+		});
 		
+		get("/accessdevice/log/", (req, res) -> {
+			return accesslog.toJson();
+		});
+		
+		get("/accessdevice/log/:id", (req, res) -> {
+			int messageId = Integer.valueOf(req.params(":id"));
+			return gson.toJson(accesslog.get(messageId));
+		});
+		
+		put("/accessdevice/code", (req, res) -> {
+			AccessCode newCode = gson.fromJson(req.body(), AccessCode.class);
+			accesscode = newCode;
+			return req.body();
+		});
+		
+		get("/accessdevice/code", (req, res) -> {
+			return gson.toJson(accesscode);
+		});
+		
+		delete("/accessdevice/log/", (req, res) -> {
+			accesslog.clear();
+			return "{}";
+		});
     }
     
 }

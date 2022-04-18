@@ -12,14 +12,17 @@ public class AccessLog {
 	protected ConcurrentHashMap<Integer, AccessEntry> log;
 	
 	public AccessLog () {
-		this.log = new ConcurrentHashMap<Integer,AccessEntry>();
+		this.log = new ConcurrentHashMap<Integer, AccessEntry>();
 		cid = new AtomicInteger(0);
 	}
 
 	// TODO: add an access entry to the log for the provided message and return assigned id
 	public int add(String message) {
 		
-		int id = 0;
+		int id = cid.addAndGet(1);
+		
+		AccessEntry newEntry = new AccessEntry(id, message);
+		log.put(id, newEntry);
 		
 		return id;
 	}
@@ -27,20 +30,18 @@ public class AccessLog {
 	// TODO: retrieve a specific access entry from the log
 	public AccessEntry get(int id) {
 		
-		return null;
+		return log.get(id);
 		
 	}
 	
 	// TODO: clear the access entry log
 	public void clear() {
-		
+		log.clear();
 	}
 	
 	// TODO: return JSON representation of the access log
 	public String toJson () {
     	
-		String json = null;
-    	
-    	return json;
+		return new Gson().toJson(log);
     }
 }
